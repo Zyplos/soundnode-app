@@ -40,7 +40,8 @@ app.factory('playerService', function (
   queueService,
   utilsService,
   modalFactory,
-  osNotificationService
+  osNotificationService,
+  discordService
 ) {
 
   $rootScope.isSongPlaying = false;
@@ -48,7 +49,9 @@ app.factory('playerService', function (
   $rootScope.shuffle = false;
   $rootScope.repeat = false;
   $rootScope.lock = false;
-
+  $rootScope.currentSongUser = "Idle";
+  $rootScope.currentSongTitle = "Nothing playing";
+    
   /**
    * Contain player actions
    * play/pause song
@@ -174,8 +177,13 @@ app.factory('playerService', function (
           }
         });
 
+      $rootScope.currentSongUser = trackObj.songUser;
+      $rootScope.currentSongTitle = trackObj.songTitle;
       $rootScope.isSongPlaying = true;
       $rootScope.$broadcast('activateQueue');
+        
+      // Set Discord RPC stuff
+	  discordService.updatePresence($rootScope.currentSongUser, $rootScope.currentSongTitle, $rootScope.isSongPlaying);
 
       // remove the active class from player favorite icon before play new song
       // TODO: this should check if the current song is already favorited
@@ -208,6 +216,9 @@ app.factory('playerService', function (
 
     this.elPlayer.play();
     $rootScope.isSongPlaying = true;
+      
+      // Set Discord RPC stuff
+	  discordService.updatePresence($rootScope.currentSongUser, $rootScope.currentSongTitle, $rootScope.isSongPlaying);
 
     /**
      * linux mpris passthrough for media keys & desktop integration
@@ -224,6 +235,9 @@ app.factory('playerService', function (
   player.pauseSong = function () {
     this.elPlayer.pause();
     $rootScope.isSongPlaying = false;
+      
+      // Set Discord RPC stuff
+	  discordService.updatePresence($rootScope.currentSongUser, $rootScope.currentSongTitle, $rootScope.isSongPlaying);
 
     /**
      * linux mpris passthrough for media keys & desktop integration

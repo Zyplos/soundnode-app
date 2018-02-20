@@ -1,6 +1,8 @@
 'use strict';
 
 const guiConfig = require(`${__dirname}/public/js/system/guiConfig.js`).guiConfig;
+const DiscordRPC = require('discord-rpc');
+const discordClientId = '415000634224410624';
 
 var app = angular.module('App', [
   'ui.router',
@@ -97,7 +99,8 @@ app.run(function (
   SCapiService,
   hotkeys,
   utilsService,
-  notificationFactory
+  notificationFactory,
+  discordService
 ) {
 
   //start GA
@@ -156,6 +159,19 @@ app.run(function (
 
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
+   
+    
+  console.log("Creating Discord RPC Client");
+  $rootScope.rpcClient = new DiscordRPC.Client({
+    transport: 'ipc'
+  });
+  $rootScope.rpcClient.on('ready', () => {
+    console.log("Discord RPC Client ready!");
+    discordService.startUp();
+  });
+
+  $rootScope.rpcClient.login(discordClientId).catch(console.error);
+  
 });
 
 angular.module('infinite-scroll').value('THROTTLE_MILLISECONDS', 200);
